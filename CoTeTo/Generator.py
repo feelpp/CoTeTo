@@ -100,9 +100,13 @@ class Generator(object):
             self.zf = zipfile.ZipFile(packagePath)
         else:
             self.zf = None
+
+        self.init()
+
+    def init(self, packagePath=''):
         self.cfg = configparser.ConfigParser()
         self.logger.debug('GEN | read Package.inf')
-        self.cfg.read_string(self.getTextFileContents('Package.inf'))
+        self.cfg.read_string(self.getTextFileContents('Package.inf', packagePath))
         g = self.cfg['GENERATOR']
         self.name = g.get('name')
         self.version = g.get('version')
@@ -152,7 +156,10 @@ class Generator(object):
         if self.zf:
             s = str(self.zf.read(os.path.join(folder, name)), 'utf8')
         else:
-            s = open(os.path.join(self.packagePath, folder, name), 'r').read()
+            if os.path.isabs(folder):
+                s = open(os.path.join(folder, name), 'r').read()
+            else:
+                s = open(os.path.join(self.packagePath, folder, name), 'r').read()
         return s
 
     def getTemplateFolder(self):
